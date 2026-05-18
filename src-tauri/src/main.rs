@@ -439,10 +439,13 @@ async fn execute_turn(state: tauri::State<'_, AppState>) -> Result<String, Strin
     }
 
     // Add to history
+    let turn = game_state.turn_number;
+    let year = game_state.current_year;
+    let month = game_state.current_month;
     game_state.turn_history.push(TurnSummary {
-        turn: game_state.turn_number,
-        year: game_state.current_year,
-        month: game_state.current_month,
+        turn,
+        year,
+        month,
         player_action: "Turn advanced".to_string(),
         results: economic_changes.iter().map(|e| e.description.clone()).collect(),
         territory_changes: Vec::new(),
