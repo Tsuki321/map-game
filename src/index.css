@@ -1,0 +1,530 @@
+/* === Reset & Base === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --danger: #f85149;
+  --success: #3fb950;
+  --warning: #d29922;
+  --input-bg: #0d1117;
+  --btn-bg: #21262d;
+  --hover-bg: #30363d;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+}
+
+/* === Layout === */
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.top-bar {
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.scenario-info {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.map-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.side-panel {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--panel);
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* === Buttons === */
+button {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+}
+button:hover {
+  background: var(--hover-bg);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #238636;
+  border-color: #2ea043;
+  color: white;
+}
+.btn-primary:hover {
+  background: #2ea043;
+}
+
+.btn-danger {
+  background: #da3633;
+  border-color: #f85149;
+}
+
+.btn-settings {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* === Inputs === */
+input[type="text"],
+input[type="password"],
+select,
+textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* === Chatbox === */
+.chatbox {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.chat-message {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  background: var(--input-bg);
+}
+
+.chat-message.system {
+  border-color: var(--accent);
+}
+
+.chat-message.user {
+  border-color: var(--success);
+}
+
+.chat-message.advisor {
+  border-color: var(--warning);
+}
+
+.chat-message.error {
+  border-color: var(--danger);
+}
+
+.chat-role {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.chat-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  font-size: 0.85rem;
+}
+
+/* === Command Input === */
+.command-input-container {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.command-input-container textarea {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px;
+  border-radius: 6px;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.command-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.command-actions label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* === Status Bar === */
+.status-bar {
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--input-bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 0.8rem;
+  gap: 24px;
+  overflow-x: auto;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.stat-bar {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.stat-bar-segment {
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.stat-bar-segment.army {
+  background: var(--success);
+}
+
+.stat-bar-segment.navy {
+  background: var(--accent);
+}
+
+.stat-bar-segment.air {
+  background: var(--warning);
+}
+
+/* === War Panel === */
+.war-panel {
+  border-bottom: 1px solid var(--border);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.war-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.war-item:last-child {
+  border-bottom: none;
+}
+
+.war-item:hover {
+  background: #1c2128;
+}
+
+.war-name {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.war-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.front-progress {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+.front-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* === Country Selector === */
+.country-selector {
+  position: relative;
+}
+
+.country-search {
+  padding: 4px 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  width: 220px;
+  font-size: 0.85rem;
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 250px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.country-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.country-option:hover {
+  background: #1c2128;
+}
+
+.country-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* === Advisor Panel === */
+.advisor-panel {
+  background: #1a1a0a;
+  border-top: 1px solid var(--warning);
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.advisor-title {
+  color: var(--warning);
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.advisor-content {
+  white-space: pre-wrap;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.advisor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* === Settings Modal === */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-card h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+}
+
+.settings-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+}
+
+/* === Scenario Select === */
+.scenario-select {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.scenario-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  min-width: 400px;
+}
+
+.scenario-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+}
+
+.scenario-card p {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.scenario-card select {
+  margin: 16px 0;
+  padding: 8px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.scenario-card .btn-primary {
+  margin-top: 8px;
+  padding: 10px 32px;
+  font-size: 1rem;
+}
+
+/* === Loading === */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* === MapLibre Overrides === */
+.maplibregl-ctrl-attrib {
+  font-size: 0.6rem !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.maplibregl-popup {
+  max-width: 300px !important;
+}
+
+.maplibregl-popup-content {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  padding: 10px !important;
+  font-size: 0.8rem !important;
+}

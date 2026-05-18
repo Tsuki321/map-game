@@ -1,0 +1,45 @@
+{
+  "productName": "Map Game",
+  "version": "0.1.0",
+  "identifier": "com.mapgame.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Map Game - Alternate History",
+        "width": 1400,
+        "height": 900,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {}
+  },
+  "plugins": {
+    "shell": {
+      "scope": [
+        {
+          "name": "open-url",
+          "cmd": "open",
+          "args": true
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "targets": ["nsis", "msi", "appimage", "dmg"]
+  }
+}
