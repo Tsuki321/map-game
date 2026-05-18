@@ -88,7 +88,6 @@ impl War {
     }
 
     pub fn resolve_military_engagement(
-        &mut self,
         attacker: &Country,
         defender: &Country,
         front: &mut Front,

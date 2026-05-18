@@ -104,7 +104,7 @@ impl GameState {
                 };
 
                 let (attacker_won, description) =
-                    war.resolve_military_engagement(attacker, defender, front, &mut rng);
+                    War::resolve_military_engagement(attacker, defender, front, &mut rng);
 
                 let attacker_gains = if attacker_won {
                     vec![front.name.clone()]

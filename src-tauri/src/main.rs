@@ -5,12 +5,15 @@ mod game;
 mod llm;
 mod tools;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
+use game::TurnSummary;
 use llm::provider::{ChatMessage, LlmConfig, LlmProvider};
 use llm::OllamaProvider;
 use llm::OpenAiProvider;
 use rusqlite::Connection;
+use tauri::Manager;
+use tokio::sync::Mutex;
 
 pub struct AppState {
     pub game_state: Arc<Mutex<game::GameState>>,
@@ -25,23 +28,23 @@ pub struct AppState {
 // ---------------------------------------------------------------------------
 
 #[tauri::command]
-fn get_game_state(state: tauri::State<'_, AppState>) -> Result<game::GameState, String> {
+async fn get_game_state(state: tauri::State<'_, AppState>) -> Result<game::GameState, String> {
     let game_state = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
     Ok(game_state.clone())
 }
 
 #[tauri::command]
-fn select_country(
+async fn select_country(
     state: tauri::State<'_, AppState>,
     country_id: String,
 ) -> Result<game::Country, String> {
     let mut game_state = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
 
     game_state.player_country_id = Some(country_id.clone());
 
@@ -56,14 +59,14 @@ fn select_country(
 }
 
 #[tauri::command]
-fn get_country_info(
+async fn get_country_info(
     state: tauri::State<'_, AppState>,
     country_id: String,
 ) -> Result<game::Country, String> {
     let game_state = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
 
     game_state
         .countries
@@ -73,11 +76,11 @@ fn get_country_info(
 }
 
 #[tauri::command]
-fn get_world_situation(state: tauri::State<'_, AppState>) -> Result<String, String> {
+async fn get_world_situation(state: tauri::State<'_, AppState>) -> Result<String, String> {
     let game_state = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
 
     let mut summary = String::new();
 
@@ -136,20 +139,16 @@ fn get_world_situation(state: tauri::State<'_, AppState>) -> Result<String, Stri
 }
 
 #[tauri::command]
-fn configure_llm(
+async fn configure_llm(
     state: tauri::State<'_, AppState>,
     provider: String,
-    api_key: String,
+    api_key: Option<String>,
     model: String,
     endpoint: String,
 ) -> Result<(), String> {
     let config = LlmConfig {
         provider_type: provider.clone(),
-        api_key: if api_key.is_empty() {
-            None
-        } else {
-            Some(api_key.clone())
-        },
+        api_key: api_key.clone(),
         model: model.clone(),
         endpoint: if endpoint.is_empty() {
             None
@@ -163,7 +162,7 @@ fn configure_llm(
         let mut config_guard = state
             .llm_config
             .lock()
-            .map_err(|e| format!("Failed to lock llm config: {}", e))?;
+            .await;
         *config_guard = Some(config.clone());
     }
 
@@ -192,7 +191,7 @@ fn configure_llm(
         let mut provider_guard = state
             .llm_provider
             .lock()
-            .map_err(|e| format!("Failed to lock llm provider: {}", e))?;
+            .await;
         *provider_guard = Some(provider_box);
     }
 
@@ -245,7 +244,7 @@ fn read_scenario_files(dir: &std::path::Path) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-fn start_new_game(
+async fn start_new_game(
     state: tauri::State<'_, AppState>,
     app_handle: tauri::AppHandle,
     scenario: String,
@@ -283,7 +282,7 @@ fn start_new_game(
         let mut state_guard = state
             .game_state
             .lock()
-            .map_err(|e| format!("Failed to lock game state: {}", e))?;
+            .await;
         *state_guard = game_state;
     }
 
@@ -291,19 +290,19 @@ fn start_new_game(
 }
 
 #[tauri::command]
-fn save_game(
+async fn save_game(
     state: tauri::State<'_, AppState>,
     slot: String,
 ) -> Result<(), String> {
     let game_state = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
 
     let db = state
         .db
         .lock()
-        .map_err(|e| format!("Failed to lock database: {}", e))?;
+        .await;
 
     db::save_game_state(&db, &slot, &game_state)
         .map_err(|e| format!("Failed to save game: {}", e))?;
@@ -312,14 +311,14 @@ fn save_game(
 }
 
 #[tauri::command]
-fn load_game(
+async fn load_game(
     state: tauri::State<'_, AppState>,
     slot: String,
 ) -> Result<game::GameState, String> {
     let db = state
         .db
         .lock()
-        .map_err(|e| format!("Failed to lock database: {}", e))?;
+        .await;
 
     let loaded = db::load_game_state(&db, &slot)
         .map_err(|e| format!("Failed to load save '{}': {}", slot, e))?;
@@ -328,18 +327,18 @@ fn load_game(
     let mut state_guard = state
         .game_state
         .lock()
-        .map_err(|e| format!("Failed to lock game state: {}", e))?;
+        .await;
     *state_guard = loaded.clone();
 
     Ok(loaded)
 }
 
 #[tauri::command]
-fn list_saves(state: tauri::State<'_, AppState>) -> Result<Vec<String>, String> {
+async fn list_saves(state: tauri::State<'_, AppState>) -> Result<Vec<String>, String> {
     let db = state
         .db
         .lock()
-        .map_err(|e| format!("Failed to lock database: {}", e))?;
+        .await;
 
     let saves = db::list_saves(&db)
         .map_err(|e| format!("Failed to list saves: {}", e))?;
@@ -357,9 +356,9 @@ async fn submit_directive(
 
     // Optionally run through advisor
     if use_advisor {
-        let game_state = state.game_state.lock().map_err(|e| format!("Lock error: {}", e))?;
-        let config_guard = state.llm_config.lock().map_err(|e| format!("Lock error: {}", e))?;
-        let provider_guard = state.llm_provider.lock().map_err(|e| format!("Lock error: {}", e))?;
+        let game_state = state.game_state.lock().await;
+        let config_guard = state.llm_config.lock().await;
+        let provider_guard = state.llm_provider.lock().await;
 
         if let (Some(config), Some(provider)) = (config_guard.as_ref(), provider_guard.as_ref()) {
             let suggestion = advisor::get_advisor_suggestion(
@@ -392,9 +391,9 @@ async fn get_advisor_suggestion(
     state: tauri::State<'_, AppState>,
     directive: String,
 ) -> Result<String, String> {
-    let game_state = state.game_state.lock().map_err(|e| format!("Lock error: {}", e))?;
-    let config_guard = state.llm_config.lock().map_err(|e| format!("Lock error: {}", e))?;
-    let provider_guard = state.llm_provider.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let game_state = state.game_state.lock().await;
+    let config_guard = state.llm_config.lock().await;
+    let provider_guard = state.llm_provider.lock().await;
 
     let (config, provider) = match (config_guard.as_ref(), provider_guard.as_ref()) {
         (Some(c), Some(p)) => (c, p),
@@ -406,7 +405,7 @@ async fn get_advisor_suggestion(
 
 #[tauri::command]
 async fn execute_turn(state: tauri::State<'_, AppState>) -> Result<String, String> {
-    let mut game_state = state.game_state.lock().map_err(|e| format!("Lock error: {}", e))?;
+    let mut game_state = state.game_state.lock().await;
 
     // Process economy
     let economic_changes = game_state.process_economy();
@@ -464,14 +463,14 @@ async fn execute_llm_turn(
 ) -> Result<String, String> {
     use tools::definitions::get_all_tools;
 
-    let provider_guard = provider_arc.lock().map_err(|e| format!("Lock error: {}", e))?;
-    let provider = provider_guard.as_ref()
-        .ok_or_else(|| "LLM not configured".to_string())?;
+    let (system_prompt, turn_context, all_tools) = {
+        let game_state = game_state_arc.lock().await;
 
-    let game_state = game_state_arc.lock().map_err(|e| format!("Lock error: {}", e))?;
-
-    let system_prompt = context::build_system_prompt(&game_state);
-    let turn_context = context::build_turn_context(&game_state);
+        let sp = context::build_system_prompt(&game_state);
+        let tc = context::build_turn_context(&game_state);
+        let tools = get_all_tools();
+        (sp, tc, tools)
+    };
 
     let mut messages = vec![
         ChatMessage {
@@ -497,14 +496,15 @@ async fn execute_llm_turn(
         },
     ];
 
-    let all_tools = get_all_tools();
     let mut narrative_response = String::new();
 
-    // Drop game_state lock before calling LLM (to avoid deadlock)
-    drop(game_state);
-
-    // First LLM call
-    let response = provider.chat(messages.clone(), Some(all_tools.clone())).await?;
+    // First LLM call — lock provider only for the call
+    let response = {
+        let provider_guard = provider_arc.lock().await;
+        let provider = provider_guard.as_ref()
+            .ok_or_else(|| "LLM not configured".to_string())?;
+        provider.chat(messages.clone(), Some(all_tools.clone())).await?
+    };
 
     if let Some(ref usage) = response.usage {
         eprintln!(
@@ -522,7 +522,7 @@ async fn execute_llm_turn(
             messages.push(response.message.clone());
 
             // Execute each tool
-            let mut game_state = game_state_arc.lock().map_err(|e| format!("Lock error: {}", e))?;
+            let mut game_state = game_state_arc.lock().await;
             let mut executor = tools::executors::ToolExecutor::new(&mut *game_state);
 
             for tc in tool_calls {
@@ -538,14 +538,19 @@ async fn execute_llm_turn(
             drop(game_state);
 
             // Second LLM call to get narrative after tool execution
-            let response2 = provider.chat(messages.clone(), Some(all_tools)).await?;
+            let response2 = {
+                let provider_guard = provider_arc.lock().await;
+                let provider = provider_guard.as_ref()
+                    .ok_or_else(|| "LLM not configured".to_string())?;
+                provider.chat(messages.clone(), Some(all_tools)).await?
+            };
             narrative_response = response2.message.content.clone();
 
             // Handle any further tool calls (recursive, up to 3 rounds)
             if let Some(ref tc2) = response2.message.tool_calls {
                 if !tc2.is_empty() {
                     messages.push(response2.message.clone());
-                    let mut game_state = game_state_arc.lock().map_err(|e| format!("Lock error: {}", e))?;
+                    let mut game_state = game_state_arc.lock().await;
                     let mut executor = tools::executors::ToolExecutor::new(&mut *game_state);
                     for tc in tc2 {
                         let result = executor.execute(&tc.function.name, &tc.function.arguments);
@@ -559,7 +564,12 @@ async fn execute_llm_turn(
                     }
                     drop(game_state);
 
-                    let response3 = provider.chat(messages, None).await?;
+                    let response3 = {
+                        let provider_guard = provider_arc.lock().await;
+                        let provider = provider_guard.as_ref()
+                            .ok_or_else(|| "LLM not configured".to_string())?;
+                        provider.chat(messages, None).await?
+                    };
                     if !response3.message.content.is_empty() {
                         narrative_response.push_str("\n\n");
                         narrative_response.push_str(&response3.message.content);

@@ -244,14 +244,14 @@ impl<'a> ToolExecutor<'a> {
             .state
             .countries
             .get(target_id)
-            .map(|c| c.name.as_str())
-            .unwrap_or(target_id);
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| target_id.to_string());
         let attacker_name = self
             .state
             .countries
             .get(&attacker_id)
-            .map(|c| c.name.as_str())
-            .unwrap_or(attacker_id.as_str());
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| attacker_id.clone());
 
         let war = War {
             id: war_id.clone(),
@@ -329,18 +329,18 @@ impl<'a> ToolExecutor<'a> {
             .ok_or("No player country selected")?
             .clone();
 
+        let border_name = self
+            .state
+            .countries
+            .get(target_border)
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| target_border.to_string());
+
         let player_country = self
             .state
             .countries
             .get_mut(&pid)
             .ok_or("Player country not found")?;
-
-        let border_name = self
-            .state
-            .countries
-            .get(target_border)
-            .map(|c| c.name.as_str())
-            .unwrap_or(target_border);
 
         player_country.military_power.mobilization_pct = force_size_pct;
 
@@ -433,15 +433,15 @@ impl<'a> ToolExecutor<'a> {
             .state
             .countries
             .get(target_id)
-            .map(|c| c.name.as_str())
-            .unwrap_or(target_id);
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| target_id.to_string());
 
         let player_name = self
             .state
             .countries
             .get(&pid)
-            .map(|c| c.name.as_str())
-            .unwrap_or("You");
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| "You".to_string());
 
         if accepted {
             // End the war
@@ -543,8 +543,8 @@ impl<'a> ToolExecutor<'a> {
             .state
             .countries
             .get(target_id)
-            .map(|c| c.name.as_str())
-            .unwrap_or(target_id);
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| target_id.to_string());
 
         // Add trade relation to player
         if let Some(country) = self.state.countries.get_mut(&pid) {
@@ -671,14 +671,14 @@ impl<'a> ToolExecutor<'a> {
             .state
             .countries
             .get(target_id)
-            .map(|c| c.name.as_str())
-            .unwrap_or(target_id);
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| target_id.to_string());
         let player_name = self
             .state
             .countries
             .get(&pid)
-            .map(|c| c.name.as_str())
-            .unwrap_or("You");
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| "You".to_string());
 
         // Set diplomatic stance to Allied
         self.state
@@ -747,8 +747,8 @@ impl<'a> ToolExecutor<'a> {
             .state
             .countries
             .get(&pid)
-            .map(|c| c.name.as_str())
-            .unwrap_or("Your country");
+            .map(|c| c.name.clone())
+            .unwrap_or_else(|| "Your country".to_string());
 
         // Adjust stability slightly upward (simulates decisive government action)
         if let Some(country) = self.state.countries.get_mut(&pid) {
