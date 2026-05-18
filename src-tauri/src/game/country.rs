@@ -54,7 +54,7 @@ pub struct TradeRelation {
     pub status: TradeStatus,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TradeStatus {
     Active,
     Strained,
@@ -80,7 +80,7 @@ pub enum DiplomaticStance {
     AtWar,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Treaty {
     NonAggressionPact,
     TradeAgreement,

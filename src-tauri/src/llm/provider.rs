@@ -47,13 +47,6 @@ pub struct LlmConfig {
     pub endpoint: Option<String>,
 }
 
-/// The result returned after executing a tool.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ToolResult {
-    pub tool_call_id: String,
-    pub content: String,
-}
-
 /// Response from the LLM after a chat completion.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatResponse {

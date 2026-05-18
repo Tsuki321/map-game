@@ -8,3 +8,4 @@ pub use country::*;
 pub use state::*;
 pub use war::*;
 pub use diplomacy::*;
+pub use economy::*;

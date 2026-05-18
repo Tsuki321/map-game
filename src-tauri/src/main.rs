@@ -7,7 +7,7 @@ mod tools;
 
 use std::sync::{Arc, Mutex};
 
-use llm::provider::{ChatMessage, ChatResponse, LlmConfig, LlmProvider, ToolDefinition};
+use llm::provider::{ChatMessage, LlmConfig, LlmProvider};
 use llm::OllamaProvider;
 use llm::OpenAiProvider;
 use rusqlite::Connection;
@@ -455,18 +455,6 @@ async fn execute_turn(state: tauri::State<'_, AppState>) -> Result<String, Strin
     Ok(summary)
 }
 
-#[tauri::command]
-async fn execute_directive_now(
-    state: tauri::State<'_, AppState>,
-    directive: String,
-) -> Result<String, String> {
-    let game_state_arc = state.game_state.clone();
-    let provider_arc = state.llm_provider.clone();
-    let config_arc = state.llm_config.clone();
-
-    execute_llm_turn(&game_state_arc, &provider_arc, &config_arc, &directive).await
-}
-
 // Helper: run a directive through the LLM with tool execution
 async fn execute_llm_turn(
     game_state_arc: &Arc<Mutex<game::GameState>>,
@@ -474,7 +462,6 @@ async fn execute_llm_turn(
     config_arc: &Arc<Mutex<Option<LlmConfig>>>,
     directive: &str,
 ) -> Result<String, String> {
-    use llm::provider::ChatMessage;
     use tools::definitions::get_all_tools;
 
     let provider_guard = provider_arc.lock().map_err(|e| format!("Lock error: {}", e))?;
@@ -633,7 +620,6 @@ pub fn run() {
             submit_directive,
             get_advisor_suggestion,
             execute_turn,
-            execute_directive_now,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

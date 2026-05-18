@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useGameStore } from '../stores/gameStore';
-import { selectCountry, getCountryInfo } from '../utils/api';
+import { selectCountry } from '../utils/api';
 import type { Country } from '../types';
 
 const CountrySelector: React.FC = () => {

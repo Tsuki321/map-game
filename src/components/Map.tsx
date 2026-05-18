@@ -10,7 +10,6 @@ import {
   SELECTED_BORDER_STYLE,
   getFeatureCountryId,
 } from '../utils/mapUtils';
-import type { Country } from '../types';
 
 const GEOJSON_URL = '/geodata/ne_110m_admin_0_countries.geojson';
 
@@ -87,7 +86,7 @@ const Map: React.FC = () => {
         });
 
         // Apply initial colors from game state
-        applyCountryColors(map);
+        applyCountryColors(map, data);
       } catch (err) {
         console.error('Failed to load GeoJSON:', err);
       }
@@ -97,10 +96,11 @@ const Map: React.FC = () => {
     map.on('click', 'countries-fill', (e) => {
       if (!e.features || e.features.length === 0) return;
       const feature = e.features[0];
+      const geoData = geoJsonDataRef.current;
       const countryId = getFeatureCountryId(feature);
-      if (countryId) {
+      if (countryId && geoData) {
         setSelectedCountryId(countryId);
-        highlightCountry(map, countryId);
+        highlightCountry(map, countryId, geoData);
       }
     });
 
@@ -126,8 +126,8 @@ const Map: React.FC = () => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
 
-    if (selectedCountryId) {
-      highlightCountry(map, selectedCountryId);
+    if (selectedCountryId && geoJsonDataRef.current) {
+      highlightCountry(map, selectedCountryId, geoJsonDataRef.current);
     } else {
       // Remove highlight
       map.setPaintProperty(
@@ -142,7 +142,7 @@ const Map: React.FC = () => {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded() || !geoJsonDataRef.current) return;
-    applyCountryColors(map);
+    applyCountryColors(map, geoJsonDataRef.current!);
   }, [gameState]);
 
   return (
@@ -162,8 +162,7 @@ const Map: React.FC = () => {
 };
 
 /** Applies fill colors to all countries based on current game state */
-function applyCountryColors(map: maplibregl.Map) {
-  const data = geoJsonDataRef.current;
+function applyCountryColors(map: maplibregl.Map, data: GeoJSON.FeatureCollection) {
   if (!data) return;
 
   const state = useGameStore.getState().gameState;
@@ -178,7 +177,7 @@ function applyCountryColors(map: maplibregl.Map) {
   const matchExpr: (string | number | string[])[] = ['match', ['get', 'ISO_A3']];
 
   // Build lookup from properties
-  data.features.forEach((f) => {
+  data.features.forEach((f: GeoJSON.Feature) => {
     const props = f.properties;
     if (!props) return;
     const id = props.ISO_A3 || props.ISO_A2 || props.ADMIN || props.NAME;
@@ -197,7 +196,7 @@ function applyCountryColors(map: maplibregl.Map) {
 
   // Also style borders
   const borderMatch: (string | number | any[])[] = ['match', ['get', 'ISO_A3']];
-  data.features.forEach((f) => {
+  data.features.forEach((f: GeoJSON.Feature) => {
     const props = f.properties;
     if (!props) return;
     const id = props.ISO_A3 || props.ISO_A2 || props.ADMIN || props.NAME;
@@ -215,8 +214,7 @@ function applyCountryColors(map: maplibregl.Map) {
 }
 
 /** Highlights a single country by filtering the highlight layer */
-function highlightCountry(map: maplibregl.Map, countryId: string) {
-  const data = geoJsonDataRef.current;
+function highlightCountry(map: maplibregl.Map, countryId: string, data: GeoJSON.FeatureCollection) {
   if (!data) return;
 
   // Filter highlight layer to only show the selected country
